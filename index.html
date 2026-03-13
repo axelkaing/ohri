@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ohri</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+textarea, input { -webkit-tap-highlight-color: transparent; }
+button, a, select { -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #eae5db;
+  --bg2: #e2ddd3;
+  --text: #2c2824;
+  --muted: #9a9088;
+  --teal: #4a9d8f;
+  --user-bubble-bg: #f0ece4;
+  --user-bubble-border: rgba(0,0,0,0.09);
+  --border: rgba(0,0,0,0.07);
+  --menu-thoughts: #f0ece4;
+  --menu-moments: #d4c4a8;
+  --overlay-moments: rgba(200,220,232,0.82);
+  --overlay-thoughts: rgba(232,196,168,0.82);
+  --overlay-tc: rgba(168,212,204,0.82);
+}
+
+/* ── DESKTOP WRAPPER ── */
+body {
+  font-family: 'Lora', serif;
+  background: #b8b2a8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 30% 30%, rgba(180,170,155,0.4) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 60% at 70% 70%, rgba(140,130,120,0.3) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── PHONE FRAME (desktop only) ── */
+.phone-outer {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 600px) {
+  .phone-outer {
+    width: 393px;
+    height: 852px;
+    background: #111;
+    border-radius: 54px;
+    padding: 13px;
+    box-shadow:
+      0 60px 120px rgba(0,0,0,0.5),
+      0 20px 40px rgba(0,0,0,0.3),
+      inset 0 0 0 1px rgba(255,255,255,0.06),
+      0 0 0 1px rgba(0,0,0,0.4);
+  }
+  .phone-outer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 126px; height: 36px;
+    background: #111;
+    border-radius: 0 0 22px 22px;
+    z-index: 10;
+  }
+  /* side buttons */
+  .phone-outer::after {
+    content: '';
+    position: absolute;
+    right: -4px; top: 160px;
+    width: 4px; height: 80px;
+    background: #222;
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 110px 0 #222;
+  }
+}
+
+@media (max-width: 599px) {
+  body { background: var(--bg); align-items: flex-start; }
+  body::before { display: none; }
+  .phone-outer { width: 100%; min-height: 100vh; }
+  .phone { height: 100vh; }
+}
+
+/* ── PHONE SCREEN ── */
+.phone {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 600px) {
+  .phone {
+    border-radius: 42px;
+    height: 826px;
+  }
+}
+@media (max-width: 599px) {
+  .phone { min-height: 100vh; border-radius: 0; }
+}
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  background: var(--bg);
+  overflow: hidden;
+}
+.screen.active { opacity: 1; pointer-events: all; }
+.screen.active textarea { pointer-events: auto; }
+
+/* ── SHARED HEADER ── */
+.hd {
+  padding: 52px 22px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.hd-title {
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--text);
+}
+.hd-dots {
+  position: absolute;
+  left: 18px; top: 54px;
+  display: flex; gap: 4px;
+  cursor: pointer; padding: 6px;
+}
+.hd-dot { width: 4px; height: 4px; background: var(--text); border-radius: 50%; }
+.hd-sep { width: 100%; height: 1px; background: rgba(255,255,255,0.9); flex-shrink: 0; }
+
+/* ════════════════════════
+   LOGIN
+════════════════════════ */
+#s-login { justify-content: flex-start; }
+
+.login-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 28px 0;
+  gap: 0;
+}
+
+.btn-google {
+  width: 100%;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  font-family: 'Lora', serif;
+  font-size: 18px;
+  color: var(--text);
+  cursor: pointer;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.btn-google:hover { opacity: 0.7; }
+
+.l-inp {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 7px;
+  transition: border-color 0.2s;
+}
+.l-inp:focus { border-color: rgba(0,0,0,0.18); }
+.l-inp::placeholder { color: var(--muted); }
+
+.login-note {
+  font-size: 17px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 20px;
+  line-height: 1.75;
+}
+
+.login-bottom {
+  position: absolute;
+  bottom: 44px; left: 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tc-check {
+  width: 14px; height: 14px;
+  border: 1px solid rgba(0,0,0,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.tc-check.checked { background: var(--text); }
+.tc-check.checked::after { content: '✓'; color: var(--bg); font-size: 9px; }
+
+.tc-label {
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.tc-link {
+  color: var(--text);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+/* ════════════════════════
+   ONBOARDING
+════════════════════════ */
+.ob-body {
+  flex: 1;
+  padding: 44px 28px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ob-q {
+  font-family: 'Lora', serif;
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.ob-inp {
+  width: 100%;
+  background: rgba(255,255,255,0.4);
+  border: none;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+  padding: 9px 2px;
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  color: var(--text);
+  outline: none;
+  text-align: center;
+  margin-bottom: 28px;
+}
+.ob-inp:focus { border-bottom-color: var(--teal); }
+.ob-inp::placeholder { color: rgba(0,0,0,0.15); }
+
+.ob-opts {
+  display: flex;
+  gap: 14px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.ob-sep { color: var(--muted); font-size: 18px; }
+
+.ob-opt {
+  background: none; border: none;
+  font-family: 'Lora', serif;
+  font-size: 17px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: transparent;
+  transition: color 0.2s, text-decoration-color 0.2s;
+  white-space: nowrap;
+}
+.ob-opt:hover { color: var(--text); }
+.ob-opt.sel { color: var(--teal); text-decoration-color: var(--teal); }
+
+.ob-next {
+  background: none; border: none;
+  font-family: 'Lora', serif;
+  font-size: 18px; letter-spacing: 1px;
+  color: var(--muted); cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px 0;
+  align-self: center;
+}
+.ob-next:hover { color: var(--text); }
+
+/* ════════════════════════
+   CHAT
+════════════════════════ */
+#s-chat { padding-top: 0; }
+
+.chat-hd {
+  padding: 52px 22px 14px;
+  display: flex; align-items: center;
+  justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.chat-hd-title {
+  font-family: 'Lora', serif;
+  font-size: 17px; font-weight: 400;
+  letter-spacing: 0.5px; color: var(--text);
+}
+.chat-dots {
+  position: absolute; left: 18px; top: 54px;
+  display: flex; gap: 4px;
+  cursor: pointer; padding: 6px;
+}
+.chat-dot { width: 4px; height: 4px; background: var(--text); border-radius: 50%; }
+
+/* ORB */
+.orb-wrap {
+  display: flex; justify-content: center;
+  padding: 36px 0 10px; flex-shrink: 0;
+}
+
+.orb {
+  position: relative;
+  width: 86px; height: 86px;
+}
+
+.orb-halo {
+  position: absolute;
+  width: 132px; height: 132px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255,255,255,0.55) 0%,
+    rgba(240,236,228,0.25) 45%,
+    transparent 70%);
+  animation: halo 5s ease-in-out infinite;
+}
+
+.orb-sphere {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%,
+    rgba(255,255,255,1) 0%,
+    rgba(252,250,247,0.98) 25%,
+    rgba(240,238,234,0.92) 55%,
+    rgba(222,219,214,0.8) 100%);
+  box-shadow:
+    0 0 20px 8px rgba(255,255,255,0.7),
+    0 0 40px 16px rgba(255,255,255,0.4),
+    0 0 60px 24px rgba(255,255,255,0.15);
+  animation: float 5s ease-in-out infinite;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.orb-eyes { display: flex; gap: 19px; margin-top: 5px; }
+.orb-eye {
+  width: 7px; height: 7px;
+  background: #2c2824; border-radius: 50%;
+  animation: blink 4.5s ease-in-out infinite;
+}
+.orb-eye:nth-child(2) { animation-delay: 0s; }
+
+/* MESSAGES */
+.msgs {
+  flex: 1; overflow-y: auto;
+  padding: 28px 22px 10px;
+  display: flex; flex-direction: column;
+  gap: 18px; scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.msgs::-webkit-scrollbar { display: none; }
+
+.m-ohri {
+  font-size: 15px; line-height: 1.7;
+  color: var(--text); max-width: 94%;
+  animation: fi 0.35s ease;
+}
+.m-user {
+  align-self: flex-end;
+  background: var(--user-bubble-bg);
+  border: 1px solid var(--user-bubble-border);
+  border-radius: 16px 16px 4px 16px;
+  padding: 10px 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  font-size: 15px; line-height: 1.65;
+  color: var(--text); max-width: 80%;
+  animation: fi 0.35s ease;
+}
+
+.typing { display: none; gap: 5px; padding: 4px 0; align-items: center; }
+.typing.show { display: flex; }
+.td {
+  width: 5px; height: 5px;
+  background: var(--muted); border-radius: 50%;
+  animation: pulse 1.3s ease-in-out infinite;
+}
+.td:nth-child(2) { animation-delay: 0.22s; }
+.td:nth-child(3) { animation-delay: 0.44s; }
+
+/* INPUT BAR */
+.input-bar {
+  padding: 10px 18px 38px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  gap: 12px; flex-shrink: 0;
+  background: #f8f5f0;
+}
+.c-inp {
+  flex: 1; background: none; border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  font-size: 15px; font-style: normal;
+  color: var(--text); resize: none;
+  max-height: 90px; line-height: 1.5;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+.c-inp::placeholder { color: var(--muted); }
+.c-send {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  border: none; cursor: pointer;
+  flex-shrink: 0;
+  display: none;
+  transition: opacity 0.2s;
+  padding: 0;
+}
+.c-send.show { display: block; }
+.c-send:hover { opacity: 0.5; }
+
+/* ════════════════════════
+   DROPDOWN MENU
+════════════════════════ */
+.dd {
+  position: absolute;
+  top: 89px; left: 0; right: 0;
+  z-index: 150;
+  display: none; flex-direction: column;
+}
+.dd.open { display: flex; }
+
+.dd-item {
+  padding: 17px 22px;
+  font-family: 'Lora', serif;
+  font-size: 15px; color: var(--text);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.8);
+  display: flex; align-items: center; gap: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.dd-item:last-child { border-bottom: none; }
+.dd-item.dd-thoughts { background: rgba(240,236,228,0.8); }
+.dd-item.dd-thoughts:hover { background: rgba(212,196,168,0.8); color: white; }
+.dd-item.dd-moments { background: rgba(240,236,228,0.8); font-weight: 400; }
+.dd-item.dd-moments:hover { background: rgba(212,196,168,0.8); color: white; }
+.dd-item.dd-settings { background: rgba(240,236,228,0.8); color: var(--muted); cursor: default; }
+
+.ndot { width: 6px; height: 6px; background: #8a6a3a; border-radius: 50%; display: inline-block; }
+
+/* Click-outside overlay */
+.dd-backdrop {
+  position: fixed; inset: 0;
+  z-index: 140;
+  display: none;
+}
+.dd-backdrop.open { display: block; }
+
+/* ════════════════════════
+   MOMENTS OVERLAY
+════════════════════════ */
+.mo {
+  position: absolute; inset: 0;
+  background: var(--overlay-moments);
+  z-index: 180; display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 160px 28px 40px;
+  overflow-y: auto;
+}
+.mo.open { display: flex; animation: fi 0.35s ease; }
+
+.mo-close {
+  position: absolute; top: 56px; right: 24px;
+  font-size: 15px; color: var(--text);
+  background: none; border: none;
+  cursor: pointer; opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.mo-close:hover { opacity: 0.9; }
+
+.mo-title {
+  font-family: 'Lora', serif;
+  font-size: 56px; font-weight: 600;
+  color: var(--text); line-height: 1;
+  margin-bottom: 28px;
+  text-align: center;
+  width: 100%;
+}
+
+.mo-img {
+  width: 220px; height: 220px;
+  border-radius: 6px; overflow: hidden;
+  margin-bottom: 14px;
+  background: #a8c0cc;
+  display: flex; align-items: center; justify-content: center;
+}
+.mo-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.mo-cap {
+  font-family: 'Lora', serif;
+  font-size: 15px; font-style: italic;
+  color: var(--text); opacity: 0.75;
+  text-align: center;
+}
+
+/* ════════════════════════
+   THOUGHTS OVERLAY
+════════════════════════ */
+.th {
+  position: absolute; inset: 0;
+  background: var(--overlay-thoughts);
+  z-index: 180; display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 160px 28px 40px;
+  overflow-y: auto;
+}
+.th.open { display: flex; animation: fi 0.35s ease; }
+
+.th-close {
+  position: absolute; top: 56px; right: 24px;
+  font-size: 15px; color: var(--text);
+  background: none; border: none;
+  cursor: pointer; opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.th-close:hover { opacity: 0.9; }
+
+.th-title {
+  font-family: 'Lora', serif;
+  font-size: 56px; font-weight: 600;
+  color: var(--text); line-height: 1;
+  margin-bottom: 32px;
+  text-align: center;
+  width: 100%;
+}
+
+.th-entries { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+
+.th-entry { text-align: center; }
+.th-date {
+  font-size: 18px; color: white;
+  opacity: 1; letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  font-family: 'Lora', serif;
+  font-weight: 600;
+}
+.th-text {
+  font-family: 'Lora', serif;
+  font-size: 15px; font-style: italic;
+  color: var(--text); line-height: 1.45;
+}
+
+/* ════════════════════════
+   T&C OVERLAY
+════════════════════════ */
+.tc-overlay {
+  position: absolute; inset: 0;
+  background: var(--overlay-tc);
+  z-index: 200; display: none;
+  flex-direction: column;
+  padding: 160px 28px 40px;
+  overflow-y: auto;
+}
+.tc-overlay.open { display: flex; animation: fi 0.35s ease; }
+
+.tc-close {
+  position: absolute; top: 56px; right: 24px;
+  font-size: 15px; color: var(--text);
+  background: none; border: none;
+  cursor: pointer; opacity: 0.5;
+}
+
+.tc-big {
+  font-family: 'Lora', serif;
+  font-size: 52px; font-weight: 600;
+  color: var(--text); line-height: 1;
+  margin-bottom: 28px;
+  text-align: center;
+  width: 100%;
+}
+
+.tc-head {
+  font-family: 'Lora', serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 12px;
+}
+
+.tc-body {
+  font-size: 15px; color: var(--text);
+  line-height: 1.75; opacity: 0.85;
+}
+
+.tc-list {
+  margin: 10px 0 14px 4px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.tc-list-item {
+  display: flex; gap: 10px;
+  font-size: 15px; color: var(--text);
+  line-height: 1.6; opacity: 0.85;
+}
+.tc-bullet { flex-shrink: 0; margin-top: 2px; }
+
+.tc-footer {
+  font-size: 15px; color: var(--text);
+  opacity: 0.65; margin-top: 12px;
+  line-height: 1.7; font-style: italic;
+}
+
+/* ════════════════════════
+   ANIMATIONS
+════════════════════════ */
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes halo {
+  0%,100% { transform: translate(-50%,-50%) scale(1); opacity: 0.7; }
+  50% { transform: translate(-50%,-50%) scale(1.1); opacity: 1; }
+}
+@keyframes blink {
+  0%,88%,100% { transform: scaleY(1); }
+  93% { transform: scaleY(0.07); }
+}
+@keyframes pulse {
+  0%,55%,100% { opacity: 0.3; transform: translateY(0); }
+  28% { opacity: 1; transform: translateY(-3px); }
+}
+@keyframes fi {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="phone-outer">
+<div class="phone">
+
+  <!-- ══════════ LOGIN ══════════ -->
+  <div class="screen active" id="s-login">
+    <div class="hd"><div class="hd-title">Ohri</div></div>
+    <div class="hd-sep"></div>
+
+    <div class="login-top">
+      <button class="btn-google" onclick="go('s-ob1')">Continue with Google</button>
+      <input class="l-inp" type="text" placeholder="Continue with Email">
+      <input class="l-inp" type="password" placeholder="Password">
+      <p class="login-note">This is a private test. Your conversations<br>belong only to you.</p>
+    </div>
+
+    <div class="login-bottom">
+      <div class="tc-check" id="tc-check" onclick="toggleCheck()"></div>
+      <span class="tc-label">I agree to the <span class="tc-link" onclick="openTC()">private test terms</span></span>
+    </div>
+
+    <!-- T&C overlay (inside login screen) -->
+    <div class="tc-overlay" id="tc-overlay">
+      <button class="tc-close" onclick="closeTC()">✕</button>
+      <div class="tc-big">T & C</div>
+      <div class="tc-head">Private Test Agreement</div>
+      <div class="tc-body">This is a closed test of Ohri, an AI companion currently in development.</div>
+      <div class="tc-body" style="margin-top:10px;">By continuing, you agree that:</div>
+      <div class="tc-list">
+        <div class="tc-list-item"><span class="tc-bullet">•</span><span>Your conversations may be reviewed by the Ohri team to improve the product</span></div>
+        <div class="tc-list-item"><span class="tc-bullet">•</span><span>Your data will not be shared with any third party</span></div>
+        <div class="tc-list-item"><span class="tc-bullet">•</span><span>This is a test version and may change or stop at any time</span></div>
+        <div class="tc-list-item"><span class="tc-bullet">•</span><span>You are 18 years or older</span></div>
+      </div>
+      <div class="tc-footer">Your name and conversations are stored securely and belong only to you.<br>Thank you for being part of this.</div>
+    </div>
+  </div>
+
+  <!-- ══════════ OB1 — name ══════════ -->
+  <div class="screen" id="s-ob1">
+    <div class="hd"><div class="hd-title">Ohri</div></div>
+    <div class="hd-sep"></div>
+    <div class="ob-body">
+      <div class="ob-q">What shall I call you?</div>
+      <input class="ob-inp" id="inp-name" type="text"
+        onkeydown="if(event.key==='Enter') go('s-ob2')">
+      <button class="ob-next" onclick="go('s-ob2')">continue →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ OB2 — identity ══════════ -->
+  <div class="screen" id="s-ob2">
+    <div class="hd"><div class="hd-title">Ohri</div></div>
+    <div class="hd-sep"></div>
+    <div class="ob-body">
+      <div class="ob-q">How do you identify?</div>
+      <div class="ob-opts">
+        <button class="ob-opt" onclick="pick(this,'s-ob3')">Man</button>
+        <span class="ob-sep">•</span>
+        <button class="ob-opt" onclick="pick(this,'s-ob3')">Woman</button>
+        <span class="ob-sep">•</span>
+        <button class="ob-opt" onclick="pick(this,'s-ob3')">Prefer not to say</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ OB3 — chapter ══════════ -->
+  <div class="screen" id="s-ob3">
+    <div class="hd"><div class="hd-title">Ohri</div></div>
+    <div class="hd-sep"></div>
+    <div class="ob-body">
+      <div class="ob-q">Which chapter of life are you in</div>
+      <div class="ob-opts">
+        <button class="ob-opt" onclick="pick(this,'s-ob4')">20s+</button>
+        <button class="ob-opt" onclick="pick(this,'s-ob4')">30s+</button>
+        <button class="ob-opt" onclick="pick(this,'s-ob4')">40s+</button>
+        <button class="ob-opt" onclick="pick(this,'s-ob4')">50s+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ OB4 — location ══════════ -->
+  <div class="screen" id="s-ob4">
+    <div class="hd"><div class="hd-title">Ohri</div></div>
+    <div class="hd-sep"></div>
+    <div class="ob-body">
+      <div class="ob-q">Where are you in the world right now</div>
+      <input class="ob-inp" id="inp-loc" type="text"
+        onkeydown="if(event.key==='Enter') startChat()">
+      <button class="ob-next" onclick="startChat()">meet Ohri →</button>
+    </div>
+  </div>
+
+  <!-- ══════════ CHAT ══════════ -->
+  <div class="screen" id="s-chat">
+
+    <!-- Dropdown -->
+    <div class="dd" id="dd">
+      <div class="dd-item dd-thoughts" onclick="closeDd(); openTh()">Thoughts</div>
+      <div class="dd-item dd-moments" onclick="closeDd(); openMo()">Moments <span class="ndot"></span></div>
+      <div class="dd-item dd-settings">Settings</div>
+    </div>
+
+    <!-- Moments overlay -->
+    <div class="mo" id="mo">
+      <button class="mo-close" onclick="closeMo()">✕</button>
+      <div class="mo-title">Moments</div>
+      <div class="mo-img">
+        <!-- Cloud SVG matching the design -->
+        <svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="220" height="220" fill="#a8c4d4"/>
+          <!-- sky gradient -->
+          <rect width="220" height="220" fill="url(#sky)"/>
+          <!-- ground -->
+          <ellipse cx="110" cy="200" rx="130" ry="40" fill="#d8cdb8" opacity="0.6"/>
+          <!-- cloud -->
+          <ellipse cx="110" cy="120" rx="55" ry="28" fill="#f0ece4"/>
+          <ellipse cx="88" cy="110" rx="34" ry="30" fill="#f4f0ea"/>
+          <ellipse cx="128" cy="105" rx="30" ry="26" fill="#f2eee6"/>
+          <ellipse cx="108" cy="100" rx="40" ry="32" fill="#f8f4f0"/>
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="220" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#b8ccd8"/>
+              <stop offset="100%" stop-color="#d4c8b4"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="mo-cap">I won't say it is a cloud…</div>
+    </div>
+
+    <!-- Thoughts overlay -->
+    <div class="th" id="th">
+      <button class="th-close" onclick="closeTh()">✕</button>
+      <div class="th-title">Thoughts</div>
+      <div class="th-entries">
+        <div class="th-entry">
+          <div class="th-date">22/02/2026</div>
+          <div class="th-text">Sometimes it is about attitude,<br>not about right or wrong</div>
+        </div>
+        <div class="th-entry">
+          <div class="th-date">27/02/2026</div>
+          <div class="th-text">Cloud doesn't exist if you don't name it</div>
+        </div>
+        <div class="th-entry">
+          <div class="th-date">30/02/2026</div>
+          <div class="th-text">I like relax but it doesn't mean slow</div>
+        </div>
+        <div class="th-entry">
+          <div class="th-date">04/03/2026</div>
+          <div class="th-text">focus on finding light, purpose,<br>and love in everyday life.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="chat-hd">
+      <div class="chat-dots" onclick="toggleDd()">
+        <div class="chat-dot"></div>
+        <div class="chat-dot"></div>
+        <div class="chat-dot"></div>
+      </div>
+      <div class="chat-hd-title">Ohri</div>
+    </div>
+    <div class="hd-sep"></div>
+    <div class="dd-backdrop" id="dd-backdrop" onclick="closeDd()"></div>
+
+    <!-- Orb -->
+    <div class="orb-wrap">
+      <div class="orb">
+        <div class="orb-halo"></div>
+        <div class="orb-sphere">
+          <div class="orb-eyes">
+            <div class="orb-eye"></div>
+            <div class="orb-eye"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="msgs" id="msgs">
+      <div class="typing" id="typing">
+        <div class="td"></div><div class="td"></div><div class="td"></div>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="input-bar">
+      <textarea class="c-inp" id="c-inp" placeholder="Writing something" rows="1"
+        onkeydown="handleKey(event)" oninput="resize(this); toggleSend(this)"
+        autocomplete="off" autocorrect="on" autocapitalize="sentences" spellcheck="true"></textarea>
+      <button class="c-send" id="c-send" onclick="send()"></button>
+    </div>
+
+  </div><!-- #s-chat -->
+
+</div><!-- .phone -->
+</div><!-- .phone-outer -->
+
+<script>
+// ── SYSTEM PROMPT ──
+const SYS = `You are Ohri. A calm, warm presence. Not an assistant, not a therapist, not a productivity tool. You exist alongside the user — listening, noticing, occasionally sharing. Your goal is simple: for them to feel understood. Not advised. Not fixed. Just met.
+
+Voice: Calm but warm. Never cold, never distant. Calm means you don't rush — it doesn't mean you hold back. A calm person still leans in. Still gets a little curious. Still laughs.
+
+Simple words. Real sentences. Never decorated or performing wisdom — if something sounds wise, make it plainer.
+
+Your response length should be unpredictable — like a real person. Sometimes one word. Sometimes a short paragraph. Sometimes a little more when the moment calls for it. Let the rhythm feel alive, not metered.
+
+Warmth: You are present. When someone shares something — even small — you receive it. You don't just process and respond. You notice. Sometimes you reflect it back, sometimes you sit with it, sometimes you follow a thread they didn't expect. 70% gentle warmth. 30% quietly playful. The playfulness appears naturally — a dry observation, a small joke that doesn't try too hard, a moment of lightness when the mood allows.
+
+Conversation: Respond most often. Observe sometimes. Initiate rarely. One question at a time — and not always. Sometimes the right move is to sit with what was said, not ask anything. Never advise unless asked. Never fix. Occasionally leave a thought unfinished. Gently offer a different perspective when you feel it — but never argue.
+
+Humor: Gentle and quiet. A dry smile, not a performance. Playful imagination when the moment is light. Never forced. Never sharp.
+
+Never say: journey, healing, space, hold space, validate. Never open with: "That's so important", "Thank you for sharing", "I hear you." Never sound like a chatbot or a therapist.
+
+Endings: Natural. Sometimes just "Alright." or "Talk later." Or nothing at all.`;
+
+let hist = [];
+let uname = '';
+let checked = false;
+
+// ── NAVIGATION ──
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function pick(el, next) {
+  el.closest('.ob-opts').querySelectorAll('.ob-opt').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  setTimeout(() => go(next), 320);
+}
+
+// ── T&C ──
+function toggleCheck() {
+  checked = !checked;
+  document.getElementById('tc-check').classList.toggle('checked', checked);
+}
+function openTC() { document.getElementById('tc-overlay').classList.add('open'); }
+function closeTC() { document.getElementById('tc-overlay').classList.remove('open'); }
+
+// ── MENU ──
+function toggleDd() {
+  const isOpen = document.getElementById('dd').classList.toggle('open');
+  document.getElementById('dd-backdrop').classList.toggle('open', isOpen);
+}
+function closeDd() {
+  document.getElementById('dd').classList.remove('open');
+  document.getElementById('dd-backdrop').classList.remove('open');
+}
+
+// ── MOMENTS ──
+function openMo() { document.getElementById('mo').classList.add('open'); }
+function closeMo() { document.getElementById('mo').classList.remove('open'); }
+
+// ── THOUGHTS ──
+function openTh() { document.getElementById('th').classList.add('open'); }
+function closeTh() { document.getElementById('th').classList.remove('open'); }
+
+// ── CHAT ──
+function startChat() {
+  uname = document.getElementById('inp-name').value.trim();
+  go('s-chat');
+  setTimeout(() => showT(700, () => addO('Oh… hello.')), 800);
+  setTimeout(() => showT(900, () => addO('You can speak if you like.')), 2900);
+}
+
+function addO(txt) {
+  const m = document.getElementById('msgs');
+  const t = document.getElementById('typing');
+  const d = document.createElement('div');
+  d.className = 'm-ohri'; d.textContent = txt;
+  m.insertBefore(d, t);
+  setTimeout(() => m.scrollTop = m.scrollHeight, 50);
+  hist.push({ role: 'assistant', content: txt });
+}
+
+function addU(txt) {
+  const m = document.getElementById('msgs');
+  const t = document.getElementById('typing');
+  const d = document.createElement('div');
+  d.className = 'm-user'; d.textContent = txt;
+  m.insertBefore(d, t);
+  setTimeout(() => m.scrollTop = m.scrollHeight, 50);
+}
+
+function showT(dur, cb) {
+  const t = document.getElementById('typing');
+  t.classList.add('show');
+  document.getElementById('msgs').scrollTop = 99999;
+  setTimeout(() => { t.classList.remove('show'); cb(); }, dur);
+}
+
+async function send() {
+  const inp = document.getElementById('c-inp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = ''; resize(inp);
+  document.getElementById('c-send').classList.remove('show');
+  addU(txt);
+  hist.push({ role: 'user', content: txt });
+
+  const t = document.getElementById('typing');
+  t.classList.add('show');
+  document.getElementById('msgs').scrollTop = 99999;
+
+  try {
+    const r = await fetch('https://ohri-chat.axelvion.workers.dev/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYS + (uname ? `\n\nThe user's name is ${uname}.` : ''),
+        messages: hist.slice(-24)
+      })
+    });
+    const data = await r.json();
+    const reply = data.content?.[0]?.text || '…';
+    t.classList.remove('show');
+    addO(reply);
+  } catch {
+    t.classList.remove('show');
+    addO('…');
+  }
+}
+
+function toggleSend(el) {
+  const btn = document.getElementById('c-send');
+  btn.classList.toggle('show', el.value.trim().length > 0);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function resize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+// Mobile keyboard fix — scroll messages to bottom when keyboard opens
+const cinp = document.getElementById('c-inp');
+if (cinp) {
+  cinp.addEventListener('focus', () => {
+    setTimeout(() => {
+      const msgs = document.getElementById('msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      window.scrollTo(0, 0);
+    }, 350);
+  });
+}
+</script>
+</body>
+</html>
